@@ -1,13 +1,12 @@
-package com.example.micarrito;
+package com.example.ejer1;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MicarritoApplicationTests {
+class MiInventarioApplicationTests {
 
 	@Test
 	void contextLoads() {
 	}
-
 }

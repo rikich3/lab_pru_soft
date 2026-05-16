@@ -1,13 +1,13 @@
-package com.example.micarrito;
+package com.example.lab4;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MicarritoApplication {
+public class Lab4Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MicarritoApplication.class, args);
+		SpringApplication.run(Lab4Application.class, args);
 	}
 
 }

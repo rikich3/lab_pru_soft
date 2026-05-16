@@ -1,0 +1,1 @@
+Implemente un programa de carrito de compras para una tienda en línea. Este ejercicio integra múltiples clases, operaciones complejas y requiere uso de Mockito para simular servicios externos como cálculo de impuestos y descuentos.
