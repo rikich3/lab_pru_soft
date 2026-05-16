@@ -1,0 +1,406 @@
+%package list
+\documentclass{article}
+\usepackage[top=3cm, bottom=3cm, outer=3cm, inner=3cm]{geometry}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{array}
+\newcolumntype{x}[1]{>{\centering\arraybackslash\hspace{0pt}}p{#1}}
+\usepackage{natbib}
+\usepackage{pdfpages}
+\usepackage{multirow}
+\usepackage[normalem]{ulem}
+\useunder{\uline}{\ul}{}
+\usepackage{svg}
+\usepackage{xcolor}
+\usepackage{listings}
+\lstdefinestyle{ascii-tree}{
+    literate={├}{|}1 {─}{--}1 {└}{+}1 
+  }
+\lstset{basicstyle=\ttfamily,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue}
+}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{tcolorbox}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{N}{@{}m{0pt}@{}}
+\usepackage{tabularx}
+\usepackage{colortbl}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\itemEmail}{rchambillap@unsa.edu.pe}
+\newcommand{\itemStudent}{Chambilla Perca Ricardo}
+\newcommand{\itemCourse}{Pruebas de Software}
+\newcommand{\itemCourseCode}{}
+\newcommand{\itemSemester}{VII}
+\newcommand{\itemUniversity}{Universidad Nacional de San Agustín de Arequipa}
+\newcommand{\itemFaculty}{Facultad de Ingeniería de Producción y Servicios}
+\newcommand{\itemDepartment}{Departamento Académico de Ingeniería de Sistemas e Informática}
+\newcommand{\itemSchool}{Escuela Profesional de Ingeniería de Sistemas}
+\newcommand{\itemAcademic}{2026}
+\newcommand{\itemInput}{20 de Abril 2026}
+\newcommand{\itemOutput}{24 de Abril 2026}
+\newcommand{\itemPracticeNumber}{02}
+\newcommand{\itemTheme}{Desarrollo Orientado a Pruebas (TDD) y Comportamiento (BDD)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[english,spanish]{babel}
+\usepackage[utf8]{inputenc}
+\AtBeginDocument{\selectlanguage{spanish}}
+\renewcommand{\figurename}{Figura}
+\renewcommand{\refname}{Referencias}
+\renewcommand{\tablename}{Tabla} 
+\AtBeginDocument{%
+	\renewcommand\tablename{Tabla}
+}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\headheight}{40.51407pt}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+\fancyhead[L]{\raisebox{-0.2\height}{\includegraphics[width=3cm]{img/logo_episunsa.png}}} % Asegurate de tener el logo en la ruta
+\fancyhead[C]{\fontsize{7}{7}\selectfont	\itemUniversity \\ \itemFaculty \\ \itemDepartment \\ \itemSchool \\ \textbf{\itemCourse}}
+\fancyhead[R]{\raisebox{-0.2\height}{\includegraphics[width=1.2cm]{img/logo_abet.png}}} % Asegurate de tener el logo en la ruta
+\fancyfoot[L]{Tecnología de la información}
+\fancyfoot[C]{\itemCourse}
+\fancyfoot[R]{Página \thepage}
+
+% para el codigo fuente
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{codebackground}{rgb}{0.95, 0.95, 0.92}
+\definecolor{tablebackground}{rgb}{0.8, 0, 0}
+\definecolor{rojoEncabezado}{HTML}{C0392B} 
+\definecolor{azulDatos}{HTML}{2E5A96}      
+
+\lstset{frame=tb,
+	language=Python,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=left,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3,
+	backgroundcolor= \color{codebackground},
+}
+
+\begin{document}
+
+	\begin{center}	
+		\fontsize{17}{17} \textbf{ Informe de Laboratorio \itemPracticeNumber}
+	\end{center}
+	\centerline{\textbf{\Large Tema: \itemTheme}}
+	
+\begin{table}[h]
+    \centering
+    \renewcommand{\arraystretch}{1.8}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash\bfseries}p{3.5cm}|X|>{\bfseries}p{2.5cm}|X|>{\bfseries}p{2.5cm}|X|}
+        \hline
+        \rowcolor{rojoEncabezado}
+        \multicolumn{6}{|c|}{\textcolor{white}{\textbf{INFORMACIÓN BÁSICA}}} \\ \hline
+        ASIGNATURA: & \multicolumn{5}{l|}{\itemCourse} \\ \hline
+        TÍTULO DE LA PRÁCTICA: & \multicolumn{5}{l|}{\textcolor{azulDatos}{\textit{\itemTheme}}} \\ \hline
+        NÚMERO DE PRÁCTICA: & \textcolor{azulDatos}{\textit{\itemPracticeNumber}} & AÑO LECTIVO: & \itemAcademic & NRO. SEMESTRE: & \itemSemester \\ \hline
+        FECHA DE PRESENTACIÓN & \textcolor{azulDatos}{\textit{\itemOutput}} & HORA DE PRESENTACIÓN & \multicolumn{3}{l|}{12:00} \\ \hline
+        \multicolumn{4}{|l|}{\multirow{2}{*}{\parbox[t]{10cm}{\vspace{0.2cm}\textbf{INTEGRANTE (s):} \\ \vspace{0.1cm} \quad $\bullet$ \itemStudent \\ \vspace{0.1cm} \quad $\bullet$ Alexandra Raquel Quispe \\ \vspace{0.1cm} \quad $\bullet$ Paul Cari Lipe \\ \vspace{0.1cm} \quad $\bullet$ Jhonatan David Quispe}}} & \multirow{2}{*}{\textbf{NOTA:}} & \multirow{2}{*}{} \\ 
+        \multicolumn{4}{|l|}{} & & \\[1.5cm] \hline
+        \multicolumn{6}{|l|}{\textbf{DOCENTE(s):}} \\ 
+        \multicolumn{6}{|l|}{\textcolor{azulDatos}{\textit{Prof. Robert Arisaca / Prof. Diego Iquira / Prof. Lino Pinto}}} \\ \hline
+    \end{tabularx}
+\end{table}
+
+\vspace*{10px}
+
+\section{EJERCICIOS/PROBLEMAS PROPUESTOS}
+\begin{itemize}		
+    \item TDD: Validador de Identificadores (Basado en Myers).
+    \item BDD: Proceso de Retiro en Cajero Automático (Caso ATM).
+    \item Validador de Calificaciones.
+    \item Calculadora de Reembolsos.
+\end{itemize}
+
+\section{Desarrollo de los Ejercicios}
+Todos los códigos se encuentran ubicados en el directorio \texttt{lab2/} del proyecto.
+
+%---------------------------------------------------------
+% EJERCICIO 1
+%---------------------------------------------------------
+\subsection{Ejercicio 1 - TDD: Validador de Identificadores (Basado en Myers)}
+
+Siguiendo estrictamente el flujo \textbf{Red-Green-Refactor} de TDD, implementaremos el validador de identificadores.
+
+\textbf{Paso 1: Fase RED (Escribir una prueba que falle)} \\
+Creamos el archivo \texttt{lab2/test\_identificador.py} y probamos la condición básica (la longitud).
+
+\begin{lstlisting}[caption={lab2/test\_identificador.py (Fase RED)}]
+import pytest
+from identificador import es_identificador_valido
+
+def test_longitud_valida():
+    # Longitud 1 (limite inferior)
+    assert es_identificador_valido("A") == True
+\end{lstlisting}
+\textit{Resultado esperado:} La prueba falla con \texttt{ImportError} porque \texttt{identificador.py} no existe.
+
+\textbf{Paso 2: Fase GREEN (Código mínimo para pasar)} \\
+Creamos \texttt{lab2/identificador.py} y aplicamos la lógica mínima para que la prueba de longitud pase.
+\begin{lstlisting}[caption={lab2/identificador.py (Fase GREEN)}]
+def es_identificador_valido(identificador):
+    return len(identificador) >= 1 and len(identificador) <= 6
+\end{lstlisting}
+\textit{Resultado esperado:} La prueba inicial ahora pasa a verde.
+
+\textbf{Paso 3: Fase REFACTOR (Corregir y optimizar)} \\
+Ajustamos la lógica para cumplir con la validación de letras al inicio y alfanuméricos después. Usaremos expresiones regulares para mayor limpieza.
+\begin{lstlisting}[caption={lab2/identificador.py (Fase REFACTOR final)}]
+import re
+
+def es_identificador_valido(identificador):
+    # Refactorizacion: Validacion de entrada (Robustez)
+    if not isinstance(identificador, str):
+        return False
+        
+    # Validacion limites Myers (1 a 6 caracteres)
+    if len(identificador) < 1 or len(identificador) > 6:
+        return False
+        
+    # Regla: Primer caracter letra, resto letras o digitos
+    patron = r'^[A-Za-z][A-Za-z0-9]*$'
+    if not re.match(patron, identificador):
+        return False
+        
+    return True
+\end{lstlisting}
+
+\textbf{Paso 4: Validación final (Valores límite y equivalencia)} \\
+Actualizamos \texttt{test\_identificador.py} con los casos de Myers solicitados.
+\begin{lstlisting}[caption={lab2/test\_identificador.py (Validación Final)}]
+import pytest
+from identificador import es_identificador_valido
+
+def test_limites_longitud_myers():
+    assert es_identificador_valido("") == False       # Longitud 0
+    assert es_identificador_valido("A") == True       # Longitud 1
+    assert es_identificador_valido("Var123") == True  # Longitud 6
+    assert es_identificador_valido("Var1234") == False# Longitud 7
+
+def test_reglas_formato():
+    assert es_identificador_valido("1var") == False   # Falla regla primer char
+    assert es_identificador_valido("var_1") == False  # Falla char especial
+    assert es_identificador_valido("v@r") == False    # Falla char especial
+\end{lstlisting}
+
+%---------------------------------------------------------
+% EJERCICIO 2
+%---------------------------------------------------------
+\subsection{Ejercicio 2 - BDD: Proceso de Retiro en Cajero Automático (Caso ATM)}
+
+\textbf{1. Fase BDD (Definición del Comportamiento)} \\
+Antes de programar, definimos el comportamiento usando el lenguaje \textbf{Gherkin}.
+\begin{lstlisting}[language=bash, caption={lab2/atm.feature}]
+Feature: Proceso de Retiro en Cajero Automatico
+  Scenario: Intento de retiro sin fondos suficientes
+    Dado que mi saldo es 100
+    Cuando intento retirar 150
+    Entonces debo ver un mensaje de "Fondos Insuficientes"
+\end{lstlisting}
+
+\textbf{2. Fase TDD (Ciclo de Desarrollo)} \\
+Traducimos los pasos de Gherkin a código Python.
+\textbf{Paso A (Red):} Creamos la prueba que llama a métodos inexistentes de una clase \texttt{ATM}.
+\begin{lstlisting}[caption={lab2/test\_atm.py (Fase RED)}]
+import pytest
+from atm import ATM
+
+def test_retiro_fondos_insuficientes():
+    # Dado que mi saldo es 100
+    cajero = ATM(100)
+    # Cuando intento retirar 150
+    resultado = cajero.retirar(150)
+    # Entonces debo ver un mensaje de "Fondos Insuficientes"
+    assert resultado == "Fondos Insuficientes"
+\end{lstlisting}
+
+\textbf{Paso B (Green \& Refactor):} Implementamos la lógica del simulador asegurando que bloquee la transacción.
+\begin{lstlisting}[caption={lab2/atm.py (Fase GREEN/REFACTOR)}]
+class ATM:
+    def __init__(self, saldo_inicial):
+        self.saldo = saldo_inicial
+    
+    def retirar(self, monto):
+        if monto > self.saldo:
+            return "Fondos Insuficientes"
+        self.saldo -= monto
+        return "Retiro Exitoso"
+\end{lstlisting}
+Al ejecutar \texttt{pytest test\_atm.py}, la prueba BDD/TDD pasa exitosamente, garantizando la robustez ante errores de usuario.
+
+%---------------------------------------------------------
+% EJERCICIO 3
+%---------------------------------------------------------
+\subsection{Ejercicio 3 - Validador de Calificaciones}
+
+\textbf{Paso 1: Fase RED} \\
+Comenzamos probando la clase de equivalencia más baja en \texttt{lab2/test\_calificaciones.py}.
+\begin{lstlisting}[caption={lab2/test\_calificaciones.py (Fase RED)}]
+from calificaciones import evaluar_rendimiento
+
+def test_calificacion_insuficiente():
+    assert evaluar_rendimiento(10) == "Insuficiente"
+\end{lstlisting}
+
+\textbf{Paso 2 y 3: Fase GREEN y REFACTOR} \\
+Codificamos \texttt{lab2/calificaciones.py} manejando los rangos y lanzando la excepción \texttt{ValueError}.
+\begin{lstlisting}[caption={lab2/calificaciones.py (Implementación Final)}]
+def evaluar_rendimiento(nota):
+    if not isinstance(nota, int):
+        raise ValueError("La nota debe ser entera")
+        
+    if nota < 0 or nota > 20:
+        raise ValueError("Nota fuera de rango")
+        
+    if 0 <= nota <= 10:
+        return "Insuficiente"
+    elif 11 <= nota <= 15:
+        return "Regular"
+    else:
+        return "Excelente"
+\end{lstlisting}
+
+\textbf{Paso 4: Validación final} \\
+Identificamos y probamos las \textbf{clases de equivalencia válidas} e \textbf{inválidas}.
+\begin{lstlisting}[caption={lab2/test\_calificaciones.py (Validación Final)}]
+import pytest
+from calificaciones import evaluar_rendimiento
+
+def test_clases_validas():
+    # Fronteras 0 - 10
+    assert evaluar_rendimiento(0) == "Insuficiente"
+    assert evaluar_rendimiento(10) == "Insuficiente"
+    # Fronteras 11 - 15
+    assert evaluar_rendimiento(11) == "Regular"
+    assert evaluar_rendimiento(15) == "Regular"
+    # Fronteras 16 - 20
+    assert evaluar_rendimiento(16) == "Excelente"
+    assert evaluar_rendimiento(20) == "Excelente"
+
+def test_clases_invalidas():
+    with pytest.raises(ValueError):
+        evaluar_rendimiento(-1)
+    with pytest.raises(ValueError):
+        evaluar_rendimiento(21)
+\end{lstlisting}
+
+%---------------------------------------------------------
+% EJERCICIO 4
+%---------------------------------------------------------
+\subsection{Ejercicio 4 - Calculadora de Reembolsos}
+
+\textbf{1. Diseño BDD (Gherkin)} \\
+Definimos el escenario de la regla especial VIP.
+\begin{lstlisting}[language=bash, caption={lab2/reembolso.feature}]
+Feature: Cancelacion de reservas
+  Scenario: Cliente VIP cancela a ultima hora
+    Dado que un cliente es VIP
+    Y el monto de su reserva es 200
+    Cuando cancela la reserva con solo 2 horas de antelacion
+    Entonces recibe un 50% de reembolso equivalente a 100
+\end{lstlisting}
+
+\textbf{2. Pruebas de Robustez y Límites (TDD - RED)} \\
+Planteamos los casos de prueba antes de la lógica.
+\begin{lstlisting}[caption={lab2/test\_reembolsos.py (Fase RED)}]
+import pytest
+from reembolsos import calcular_reembolso
+
+def test_limites_reembolso():
+    assert calcular_reembolso(100, 72, False) == 50.0  # Limite exacto 72
+    assert calcular_reembolso(100, 24, False) == 50.0  # Limite exacto 24
+    assert calcular_reembolso(100, 23, False) == 0.0   # Debajo de 24
+
+def test_escenario_vip_bdd():
+    assert calcular_reembolso(200, 2, True) == 100.0   # Escenario Gherkin
+
+def test_proteccion_errores():
+    with pytest.raises(ValueError):
+        calcular_reembolso(-100, 48, False)
+\end{lstlisting}
+
+\textbf{3. Implementación (TDD - GREEN/REFACTOR)} \\
+Aseguramos que la regla VIP tenga prioridad sobre la regla de última hora.
+\begin{lstlisting}[caption={lab2/reembolsos.py (Fase GREEN/REFACTOR)}]
+def calcular_reembolso(monto, horas, es_vip):
+    if monto < 0:
+        raise ValueError("El monto no puede ser negativo")
+        
+    if horas > 72:
+        porcentaje = 1.0
+    elif 24 <= horas <= 72:
+        porcentaje = 0.5
+    else:
+        porcentaje = 0.0
+        
+    # Prioridad Regla VIP
+    if es_vip and porcentaje < 0.5:
+        porcentaje = 0.5
+        
+    return monto * porcentaje
+\end{lstlisting}
+
+\section{Conclusiones}
+\begin{itemize}
+    \item El Desarrollo Orientado a Pruebas (TDD) garantiza una alta robustez del código mediante el ciclo Red-Green-Refactor, ya que obliga al desarrollador a considerar casos límite y validaciones de errores antes de escribir la lógica principal, logrando el modelo "Shift-Left" mencionado en la guía.
+    \item El comportamiento BDD utilizando la sintaxis Gherkin (Dado-Cuando-Entonces) cierra la brecha de comunicación entre negocio y desarrollo. Al tener especificaciones ejecutables, las pruebas actúan como documentación viva del sistema.
+    \item La aplicación del análisis de valores límite (Myers) mejora drásticamente la efectividad de las pruebas unitarias. Al enfocarse en las fronteras de las particiones (como se observó en los límites de horas 24 y 72, o la nota de 0 a 20), detectamos los "defectos off-by-one" (usar $>$ en vez de $>=$) con gran precisión.
+\end{itemize}
+
+\clearpage
+
+\section{CUESTIONARIO}
+\textbf{1. ¿Por qué en TDD se considera que "la prueba es el primer cliente del código"?}
+\vspace{0.2cm}
+Se considera al test como el "primer cliente" porque, en TDD, la prueba interactúa con la función o módulo antes incluso de que la aplicación principal la utilice. Esto obliga al programador a diseñar la API desde la perspectiva del consumidor: pensar en qué parámetros recibe y cuán fácil de usar es, antes de enfocarse en los detalles de implementación interna.
+
+\textbf{2. Explique cómo el enfoque BDD ayuda a evitar errores de comunicación entre el Product Owner y el equipo de desarrollo.}
+\vspace{0.2cm}
+BDD emplea un "Lenguaje Ubicuo" (sintaxis Gherkin estructurada en Dado-Cuando-Entonces) que es comprensible tanto para personas con perfil de negocio (Product Owner) como para perfiles técnicos. Al definir los requerimientos como escenarios de prueba vivos, se elimina la ambigüedad; si el PO define un escenario y el código lo valida en verde, se garantiza que se construyó lo solicitado.
+
+\textbf{3. Según Myers, ¿qué es el "análisis de valor límite" y por qué es más efectivo que probar solo valores aleatorios?}
+\vspace{0.2cm}
+El "Análisis de Valor Límite" es una técnica de diseño de pruebas basada en la premisa de que los errores (bugs) tienden a concentrarse en las fronteras de las clases de equivalencia (por ejemplo, el límite inferior y superior de un rango). Probar exactamente el límite y el salto de frontera es más efectivo que usar valores aleatorios porque ataca directamente los típicos errores de lógica condicional matemática.
+
+\textbf{4. ¿Cuál es el propósito del paso Refactor en el ciclo de TDD y qué riesgo se corre si se omite?}
+\vspace{0.2cm}
+El propósito del paso \textit{Refactor} es limpiar, optimizar y mejorar la legibilidad y estructura del código escrito en la fase \textit{Green}, sin alterar el comportamiento externo. Si se omite, el código acumulará "Deuda Técnica", volviéndose progresivamente caótico, difícil de mantener e inescalable a largo plazo.
+
+\textbf{5. Explique la importancia de definir el resultado esperado antes de la ejecución de una prueba.}
+\vspace{0.2cm}
+Definir el resultado esperado previamente evita el "sesgo de confirmación". Si ejecutamos el código primero y vemos su salida, tendemos a justificar que "parece correcto" y adaptamos la prueba al comportamiento actual del código. Definirlo antes garantiza que validemos la funcionalidad contra las reglas de negocio reales.
+
+\clearpage
+
+\section{Referencias y Bibliografía}
+\begin{itemize}			
+	\item [1] Andreas Spillner, "Software Testing Foundations", Editorial Rocky Nook, 2021, 5th Edition.
+    \item [2] Glenford J. Myers, "The Art of Software Testing", Editorial Jhon Wiley \& Sons, 2012, 3th Edition.
+    \item [3] Documentación oficial de Pytest: \url{https://docs.pytest.org/en/stable/}
+\end{itemize}	
+			
+\end{document}

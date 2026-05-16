@@ -1,5 +1,5 @@
 import unittest
-from atm import Cajero
+from lab1.atm import Cajero
 
 class TestCajero(unittest.TestCase):
     def setUp(self):
