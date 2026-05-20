@@ -3,6 +3,8 @@ package com.example.ejer1;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -118,4 +120,16 @@ public class ProductoTest {
         assertThrows(UnsupportedOperationException.class, () -> historial.clear(), 
             "El historial no debería ser modificable desde fuera de la clase");
     }
+
+    @Test
+    @DisplayName("CP14: Validación precisa de mensajes en excepciones")
+    void testValidacionMensajeExcepcion() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> 
+            new Producto("P", "N", -5.0, 1));
+        
+        // Esto demuestra que tienes control total sobre la lógica de negocio
+        assertTrue(exception.getMessage().contains("precio debe ser positivo"));
+    }
+
+    
 }
