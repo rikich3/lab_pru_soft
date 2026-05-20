@@ -54,4 +54,19 @@ public class ProductoTest {
     void testErrorCantidadInicialNegativa() {
         assertThrows(IllegalArgumentException.class, () -> new Producto("P", "N", 10.0, -5));
     }
+    @Test
+    @DisplayName("CP06: Agregar stock correctamente y validar historial")
+    void testAgregarStockExitoso() {
+        producto.agregarStock(5);
+        assertEquals(15, producto.consultarStock());
+        assertEquals(1, producto.getMovimientos().size());
+        assertEquals("ENTRADA", producto.getMovimientos().get(0).getTipo());
+    }
+
+    @Test
+    @DisplayName("CP07: Error al agregar stock con cantidad negativa o cero")
+    void testErrorAgregarStockInvalido() {
+        assertThrows(IllegalArgumentException.class, () -> producto.agregarStock(-1));
+        assertThrows(IllegalArgumentException.class, () -> producto.agregarStock(0));
+    }
 }
