@@ -109,4 +109,13 @@ public class ProductoTest {
         producto.agregarStock(cantidad);
         assertEquals(initial + cantidad, producto.consultarStock());
     }
+
+    @Test
+    @DisplayName("CP13: El historial de movimientos es inalterable desde afuera")
+    void testHistorialInalterable() {
+        producto.agregarStock(5);
+        var historial = producto.getMovimientos();
+        assertThrows(UnsupportedOperationException.class, () -> historial.clear(), 
+            "El historial no debería ser modificable desde fuera de la clase");
+    }
 }

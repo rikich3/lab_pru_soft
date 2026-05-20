@@ -16,4 +16,4 @@ public class Movimiento {
     public String getTipo() { return tipo; }
     public int getCantidad() { return cantidad; }
     public LocalDateTime getFechaHora() { return fechaHora; }
-}
+}   
