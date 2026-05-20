@@ -125,11 +125,16 @@ public class ProductoTest {
     @DisplayName("CP14: Validación precisa de mensajes en excepciones")
     void testValidacionMensajeExcepcion() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> 
-            new Producto("P", "N", -5.0, 1));
-        
-        // Esto demuestra que tienes control total sobre la lógica de negocio
+            new Producto("P", "N", -5.0, 1));        
         assertTrue(exception.getMessage().contains("precio debe ser positivo"));
     }
 
-    
+    @Test
+    @DisplayName("CP15: Precisión exacta en cálculos financieros")
+    void testPrecisionValorTotal() {
+        Producto p2 = new Producto("P-002", "Cable", 10.55, 2);
+        assertEquals(21.10, p2.obtenerValorTotal(), 0.001); 
+    }
+
+
 }
