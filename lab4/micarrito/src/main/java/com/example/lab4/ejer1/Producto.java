@@ -1,6 +1,7 @@
 package com.example.lab4.ejer1;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Producto {
@@ -53,7 +54,7 @@ public class Producto {
         }
 
     public List<Movimiento> getMovimientos() { 
-        return movimientos; 
+        return Collections.unmodifiableList(movimientos); 
     }
     
     public String getCodigo() { 
