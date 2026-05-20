@@ -89,4 +89,12 @@ public class ProductoTest {
     void testErrorExtraerStockNegativo() {
         assertThrows(IllegalArgumentException.class, () -> producto.extraerStock(-5));
     }
+
+    @Test
+    @DisplayName("CP11: Cálculo de valor total correcto")
+    void testValorTotal() {
+        assertEquals(12000.0, producto.obtenerValorTotal());
+        producto.agregarStock(2);
+        assertEquals(14400.0, producto.obtenerValorTotal());
+    }
 }
