@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.example.lab4.ejer1.Producto;
 
@@ -33,7 +35,7 @@ public class ProductoTest {
     @Test
     @DisplayName("CP02: Error al crear con código vacío")
     void testErrorCodigoVacio() {
-        assertThrows(IllegalArgumentException.class, () ->  new Producto("  ", "Nombre", 10.0, 1));
+        assertThrows(IllegalArgumentException.class, () -> new Producto("  ", "Nombre", 10.0, 1));
     }
 
     @Test
@@ -54,6 +56,7 @@ public class ProductoTest {
     void testErrorCantidadInicialNegativa() {
         assertThrows(IllegalArgumentException.class, () -> new Producto("P", "N", 10.0, -5));
     }
+
     @Test
     @DisplayName("CP06: Agregar stock correctamente y validar historial")
     void testAgregarStockExitoso() {
@@ -96,5 +99,14 @@ public class ProductoTest {
         assertEquals(12000.0, producto.obtenerValorTotal());
         producto.agregarStock(2);
         assertEquals(14400.0, producto.obtenerValorTotal());
+    }
+
+    @ParameterizedTest
+    @DisplayName("CP12: Agregar múltiples cantidades válidas (Parametrizado)")
+    @ValueSource(ints = {1, 5, 20})
+    void testAgregarStockParametrizado(int cantidad) {
+        int initial = producto.consultarStock();
+        producto.agregarStock(cantidad);
+        assertEquals(initial + cantidad, producto.consultarStock());
     }
 }
