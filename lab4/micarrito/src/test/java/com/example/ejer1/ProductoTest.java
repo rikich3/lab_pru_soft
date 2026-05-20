@@ -69,4 +69,24 @@ public class ProductoTest {
         assertThrows(IllegalArgumentException.class, () -> producto.agregarStock(-1));
         assertThrows(IllegalArgumentException.class, () -> producto.agregarStock(0));
     }
+
+    @Test
+    @DisplayName("CP08: Extraer stock correctamente")
+    void testExtraerStockExitoso() {
+        producto.extraerStock(5);
+        assertEquals(5, producto.consultarStock());
+        assertEquals("SALIDA", producto.getMovimientos().get(0).getTipo());
+    }
+
+    @Test
+    @DisplayName("CP09: Error al extraer más stock del disponible")
+    void testErrorExtraerStockInsuficiente() {
+        assertThrows(IllegalStateException.class, () -> producto.extraerStock(11));
+    }
+
+    @Test
+    @DisplayName("CP10: Error al extraer cantidad negativa")
+    void testErrorExtraerStockNegativo() {
+        assertThrows(IllegalArgumentException.class, () -> producto.extraerStock(-5));
+    }
 }
