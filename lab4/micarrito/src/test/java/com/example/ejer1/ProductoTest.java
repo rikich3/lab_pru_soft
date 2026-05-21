@@ -139,9 +139,15 @@ public class ProductoTest {
     @Test
     @DisplayName("CP16: Validar atributos adicionales (Cobertura 100%)")
     void testGettersAdicionales() {
+        // Probamos getNombre y getPrecio de Producto
         assertEquals("Laptop", producto.getNombre());
+        assertEquals(1200.0, producto.getPrecio());
+        
+        // Generamos un movimiento para probar sus getters restantes
         producto.agregarStock(5);
         var movimiento = producto.getMovimientos().get(0);
+        
+        // Probamos getCantidad y getFechaHora de Movimiento
         assertEquals(5, movimiento.getCantidad());
         assertNotNull(movimiento.getFechaHora(), "La fecha y hora del movimiento no debe ser nula");
     }
