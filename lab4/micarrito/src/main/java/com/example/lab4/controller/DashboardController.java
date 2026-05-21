@@ -1,4 +1,4 @@
-package com.example.lab4.ejer1.controller;
+package com.example.lab4.controller;
 
 import com.example.lab4.ejer1.Producto;
 import org.springframework.stereotype.Controller;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/inventario")
-public class InventarioController {
+public class DashboardController {
     private Producto producto = new Producto("P-001", "Laptop Gamer", 1500.0, 10);
 
     @GetMapping
