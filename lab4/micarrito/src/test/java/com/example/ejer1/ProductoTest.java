@@ -2,6 +2,7 @@ package com.example.ejer1;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
@@ -135,5 +136,13 @@ public class ProductoTest {
         assertEquals(21.10, p2.obtenerValorTotal(), 0.001); 
     }
 
-
+    @Test
+    @DisplayName("CP16: Validar atributos adicionales (Cobertura 100%)")
+    void testGettersAdicionales() {
+        assertEquals("Laptop", producto.getNombre());
+        producto.agregarStock(5);
+        var movimiento = producto.getMovimientos().get(0);
+        assertEquals(5, movimiento.getCantidad());
+        assertNotNull(movimiento.getFechaHora(), "La fecha y hora del movimiento no debe ser nula");
+    }
 }
