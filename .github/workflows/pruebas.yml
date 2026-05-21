@@ -1,0 +1,25 @@
+name: CI Pruebas de Software
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Configurar Java 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Ejecutar Pruebas con Maven (JaCoCo)
+      # Aquí le decimos que entre a tu carpeta lab4/micarrito donde está el pom.xml
+      run: |
+        cd lab4/micarrito
+        mvn clean test verify
