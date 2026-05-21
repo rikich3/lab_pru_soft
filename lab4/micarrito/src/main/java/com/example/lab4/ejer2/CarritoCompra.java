@@ -12,26 +12,29 @@ public class CarritoCompra {
     }
 
     public void agregarProducto(Producto producto, int cantidad) {
-        if (!producto.disponible()) throw new IllegalStateException("Producto no disponible");
+        // Corregido: uso de isDisponible()
+        if (!producto.isDisponible()) throw new IllegalStateException("Producto no disponible");
         if (cantidad <= 0) throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
 
+        // Corregido: uso de getId()
         items.stream()
-            .filter(i -> i.getProducto().id().equals(producto.id()))
+            .filter(i -> i.getProducto().getId().equals(producto.getId()))
             .findFirst()
             .ifPresentOrElse(
                 i -> {
                     i.setCantidad(i.getCantidad() + cantidad);
-                    historial.add("Actualizada cantidad: " + producto.nombre());
+                    historial.add("Actualizada cantidad: " + producto.getNombre());
                 },
                 () -> {
                     items.add(new ItemCarrito(producto, cantidad));
-                    historial.add("Agregado: " + producto.nombre());
+                    historial.add("Agregado: " + producto.getNombre());
                 }
             );
     }
 
     public void removerProducto(String id) {
-        items.removeIf(i -> i.getProducto().id().equals(id));
+        // Corregido: uso de getId()
+        items.removeIf(i -> i.getProducto().getId().equals(id));
         historial.add("Removido producto ID: " + id);
     }
 
@@ -41,10 +44,13 @@ public class CarritoCompra {
     }
 
     public double calcularTotal() {
+        // Corregido: uso de getPrecio()
         double subtotal = items.stream()
-                .mapToDouble(i -> i.getProducto().precio() * i.getCantidad())
+                .mapToDouble(i -> i.getProducto().getPrecio() * i.getCantidad())
                 .sum();
+        
         if (subtotal == 0) return 0;
+        
         return subtotal - servicioPrecio.calcularDescuento(subtotal) + servicioPrecio.calcularImpuesto(subtotal);
     }
 

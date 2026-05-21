@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Laboratorio 4 - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-primary">Panel de Control: Pruebas de Software</h1>
+        <p class="text-muted">Integración Ejercicio 1 (Inventario) y Ejercicio 2 (Carrito con Mockito)</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- EJERCICIO 1 -->
+        <div class="col-lg-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0">📊 Ejercicio 1: Inventario</h4>
+                </div>
+                <div class="card-body">
+                    <div class="p-3 mb-3 bg-white border rounded">
+                        <h5 th:text="${prod1.nombre}"></h5>
+                        <p class="mb-1">Código: <strong th:text="${prod1.codigo}"></strong></p>
+                        <p class="mb-1">Stock Actual: <span class="badge bg-success fs-6" th:text="${prod1.consultarStock()}"></span></p>
+                        <p class="mb-0">Valor Total: $<span th:text="${prod1.obtenerValorTotal()}"></span></p>
+                    </div>
+                    
+                    <form th:action="@{/dashboard/ejer1/add}" method="post" class="input-group mb-4">
+                        <input type="number" name="cantidad" class="form-control" placeholder="Cant. a sumar" required min="1">
+                        <button class="btn btn-primary" type="submit">➕ Agregar</button>
+                    </form>
+
+                    <h6>Historial (Ejer 1)</h6>
+                    <ul class="list-group list-group-flush">
+                        <li th:each="mov : ${prod1.getMovimientos()}" class="list-group-item d-flex justify-content-between p-1 small">
+                            <span th:text="${mov.tipo}"></span>
+                            <span th:text="${mov.cantidad}"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- EJERCICIO 2 -->
+        <div class="col-lg-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-dark text-white py-3">
+                    <h4 class="mb-0">🛒 Ejercicio 2: Carrito</h4>
+                </div>
+                <div class="card-body">
+                    <h6>Catálogo Disponble</h6>
+                    <div class="row row-cols-2 g-2 mb-3">
+                        <div th:each="p : ${catalogo}" class="col">
+                            <div class="p-2 border rounded text-center bg-white shadow-sm">
+                                <small class="d-block fw-bold" th:text="${p.nombre}"></small>
+                                <small class="d-block text-muted" th:text="'$' + ${p.precio}"></small>
+                                <form th:action="@{/dashboard/ejer2/buy}" method="post" class="mt-2">
+                                    <input type="hidden" name="id" th:value="${p.id}">
+                                    <input type="hidden" name="nombre" th:value="${p.nombre}">
+                                    <input type="hidden" name="precio" th:value="${p.precio}">
+                                    <button class="btn btn-sm btn-outline-dark w-100" th:disabled="${!p.disponible}">Comprar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-3 rounded">
+                        <h6>Tu Carrito Actual</h6>
+                        <ul class="list-group mb-2">
+                            <li th:each="item : ${carrito.items}" class="list-group-item d-flex justify-content-between align-items-center py-1">
+                                <span th:text="${item.producto.nombre} + ' x' + ${item.cantidad}"></span>
+                                <span class="badge bg-secondary" th:text="'$' + (${item.producto.precio} * ${item.cantidad})"></span>
+                            </li>
+                        </ul>
+                        <div class="text-end h5 text-danger mt-3">
+                            Total Final: $<span th:text="${carrito.calcularTotal()}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
