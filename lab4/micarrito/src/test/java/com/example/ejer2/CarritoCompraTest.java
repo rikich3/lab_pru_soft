@@ -53,7 +53,7 @@ public class CarritoCompraTest {
             carrito.agregarProducto(prodValido, 1);
             carrito.agregarProducto(prodValido, 2); // Agrega 2 más
             assertEquals(1, carrito.getItems().size(), "No debe duplicar el item");
-            assertEquals(3, carrito.getItems().get(0).getCantidad());
+            assertEquals(3, carrito.getItems().get(0).getCantidad()); //prodValido es el item 0, cantidad total debe ser 3 (1 + 2)
         }
 
         @Test
