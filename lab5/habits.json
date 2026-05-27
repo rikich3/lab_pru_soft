@@ -1,0 +1,20 @@
+[
+  {
+    "id": "7faa7065-4644-445f-9083-b3a5ed0c1b0c",
+    "name": "dormir 8 horas ",
+    "startDate": "2026-05-25",
+    "dailyDurationMinutes": 450,
+    "daysOfWeek": [
+      "MONDAY",
+      "FRIDAY",
+      "WEDNESDAY",
+      "THURSDAY",
+      "SATURDAY",
+      "SUNDAY",
+      "TUESDAY"
+    ],
+    "completedDaysInPast": 0,
+    "history": {},
+    "createdAt": "2026-05-25T05:43:14.599868314"
+  }
+]

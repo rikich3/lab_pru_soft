@@ -1,0 +1,475 @@
+package com.tracker.controllers;
+
+import com.tracker.models.Habit;
+import com.tracker.services.HabitService;
+import com.tracker.services.ValidationException;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.TextStyle;
+import java.util.*;
+
+public class MainController {
+
+    // --- FXML Bindings ---
+    @FXML private Label lblActiveCount;
+    @FXML private Label lblCommittedHours;
+    @FXML private Label lblCompletionRate;
+    @FXML private VBox habitsContainer;
+
+    @FXML private Label lblFormTitle;
+    @FXML private TextField nameField;
+    @FXML private Spinner<Integer> hoursSpinner;
+    @FXML private Spinner<Integer> minutesSpinner;
+    @FXML private DatePicker startDatePicker;
+    @FXML private VBox pastCompletionContainer;
+    @FXML private Spinner<Integer> pastCompletionSpinner;
+    @FXML private Label lblPastLimitInfo;
+
+    @FXML private ToggleButton btnMon;
+    @FXML private ToggleButton btnTue;
+    @FXML private ToggleButton btnWed;
+    @FXML private ToggleButton btnThu;
+    @FXML private ToggleButton btnFri;
+    @FXML private ToggleButton btnSat;
+    @FXML private ToggleButton btnSun;
+
+    @FXML private Label feedbackLabel;
+    @FXML private Button btnClear;
+    @FXML private Button btnSave;
+
+    // --- State Variables ---
+    private HabitService habitService;
+    private UUID editingHabitId = null;
+    private final LocalDate today = LocalDate.now();
+
+    @FXML
+    public void initialize() {
+        this.habitService = new HabitService();
+
+        // 1. Configure spin controls
+        hoursSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24, 0));
+        minutesSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 30));
+        pastCompletionSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 0, 0));
+
+        // 2. Set default values
+        startDatePicker.setValue(today);
+        updatePastCompletionsSpinnerState(today);
+
+        // 3. Attach listeners for real-time input validations
+        nameField.textProperty().addListener((obs, oldVal, newVal) -> validateFormInputsRealTime());
+        hoursSpinner.valueProperty().addListener((obs, oldVal, newVal) -> validateFormInputsRealTime());
+        minutesSpinner.valueProperty().addListener((obs, oldVal, newVal) -> validateFormInputsRealTime());
+        
+        startDatePicker.valueProperty().addListener((obs, oldVal, newDate) -> {
+            updatePastCompletionsSpinnerState(newDate);
+            validateFormInputsRealTime();
+        });
+
+        // Set up toggle buttons change listeners
+        List<ToggleButton> dayButtons = Arrays.asList(btnMon, btnTue, btnWed, btnThu, btnFri, btnSat, btnSun);
+        for (ToggleButton btn : dayButtons) {
+            btn.selectedProperty().addListener((obs, oldVal, newVal) -> {
+                // If the user shifts the scheduling, the past scheduled days count changes. Update the limit!
+                updatePastCompletionsSpinnerState(startDatePicker.getValue());
+                validateFormInputsRealTime();
+            });
+        }
+
+        // 4. Load initial dashboard
+        refreshDashboard();
+        validateFormInputsRealTime();
+    }
+
+    /**
+     * Controls the enablement and maximum value of the "Completed Days in Past" spinner based on the start date and week days schedule.
+     */
+    private void updatePastCompletionsSpinnerState(LocalDate selectedDate) {
+        if (selectedDate == null) {
+            pastCompletionContainer.setDisable(true);
+            return;
+        }
+
+        if (selectedDate.isBefore(today)) {
+            pastCompletionContainer.setDisable(false);
+            
+            // Calculate scheduled days between start date and today
+            Set<DayOfWeek> selectedDays = getSelectedDaysOfWeek();
+            int pastScheduled = getScheduledDaysCountFor(selectedDate, today, selectedDays);
+            
+            int currentSpinnerVal = pastCompletionSpinner.getValue();
+            if (currentSpinnerVal > pastScheduled) {
+                currentSpinnerVal = pastScheduled;
+            }
+            
+            pastCompletionSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, pastScheduled, currentSpinnerVal));
+            lblPastLimitInfo.setText("Límite: " + pastScheduled + " días (programados transcurridos)");
+        } else {
+            // Today or in the future
+            pastCompletionContainer.setDisable(true);
+            pastCompletionSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 0, 0));
+            lblPastLimitInfo.setText("Límite: 0 días");
+        }
+    }
+
+    private int getScheduledDaysCountFor(LocalDate start, LocalDate end, Set<DayOfWeek> days) {
+        if (start.isAfter(end) || start.isEqual(end) || days == null || days.isEmpty()) {
+            return 0;
+        }
+        int count = 0;
+        LocalDate current = start;
+        while (current.isBefore(end)) {
+            if (days.contains(current.getDayOfWeek())) {
+                count++;
+            }
+            current = current.plusDays(1);
+        }
+        return count;
+    }
+
+    /**
+     * Checks all form inputs in real-time to enable/disable the "Save" button appropriately.
+     */
+    private void validateFormInputsRealTime() {
+        String name = nameField.getText();
+        int hours = hoursSpinner.getValue() != null ? hoursSpinner.getValue() : 0;
+        int minutes = minutesSpinner.getValue() != null ? minutesSpinner.getValue() : 0;
+        int totalMinutes = hours * 60 + minutes;
+        LocalDate startDate = startDatePicker.getValue();
+        Set<DayOfWeek> days = getSelectedDaysOfWeek();
+
+        boolean isValid = name != null && !name.trim().isEmpty() &&
+                totalMinutes > 0 && totalMinutes <= 1440 &&
+                startDate != null && !startDate.isAfter(today) &&
+                !days.isEmpty();
+
+        btnSave.setDisable(!isValid);
+    }
+
+    /**
+     * Gathers all selected day of week buttons.
+     */
+    private Set<DayOfWeek> getSelectedDaysOfWeek() {
+        Set<DayOfWeek> days = new HashSet<>();
+        if (btnMon.isSelected()) days.add(DayOfWeek.MONDAY);
+        if (btnTue.isSelected()) days.add(DayOfWeek.TUESDAY);
+        if (btnWed.isSelected()) days.add(DayOfWeek.WEDNESDAY);
+        if (btnThu.isSelected()) days.add(DayOfWeek.THURSDAY);
+        if (btnFri.isSelected()) days.add(DayOfWeek.FRIDAY);
+        if (btnSat.isSelected()) days.add(DayOfWeek.SATURDAY);
+        if (btnSun.isSelected()) days.add(DayOfWeek.SUNDAY);
+        return days;
+    }
+
+    private void setSelectedDaysOfWeek(Set<DayOfWeek> days) {
+        if (days == null) return;
+        btnMon.setSelected(days.contains(DayOfWeek.MONDAY));
+        btnTue.setSelected(days.contains(DayOfWeek.TUESDAY));
+        btnWed.setSelected(days.contains(DayOfWeek.WEDNESDAY));
+        btnThu.setSelected(days.contains(DayOfWeek.THURSDAY));
+        btnFri.setSelected(days.contains(DayOfWeek.FRIDAY));
+        btnSat.setSelected(days.contains(DayOfWeek.SATURDAY));
+        btnSun.setSelected(days.contains(DayOfWeek.SUNDAY));
+    }
+
+    /**
+     * Calculates statistics and updates the visual display elements.
+     */
+    private void refreshDashboard() {
+        List<Habit> habits = habitService.getAllHabits();
+
+        // 1. Update overall statistics
+        lblActiveCount.setText(String.valueOf(habits.size()));
+
+        // Estimated minutes for habits active today
+        int todayCommittedMinutes = 0;
+        for (Habit h : habits) {
+            if (h.isActiveOnDate(today)) {
+                todayCommittedMinutes += h.getDailyDurationMinutes();
+            }
+        }
+        int h = todayCommittedMinutes / 60;
+        int m = todayCommittedMinutes % 60;
+        lblCommittedHours.setText(h + "h " + m + "m");
+
+        // Overall completion rate
+        int totalScheduledDays = 0;
+        int totalCompletions = 0;
+        for (Habit habit : habits) {
+            totalScheduledDays += habit.getTotalScheduledDaysCount(today);
+            totalCompletions += habit.getTotalCompletionsCount(today);
+        }
+        if (totalScheduledDays == 0) {
+            lblCompletionRate.setText("0.0%");
+        } else {
+            double rate = (double) totalCompletions / totalScheduledDays;
+            lblCompletionRate.setText(String.format(Locale.US, "%.1f%%", rate * 100));
+        }
+
+        // 2. Clear and rebuild the habit list cards
+        habitsContainer.getChildren().clear();
+        if (habits.isEmpty()) {
+            Label placeholder = new Label("No hay hábitos registrados. ¡Crea uno a la derecha!");
+            placeholder.setStyle("-fx-text-fill: #6b7280; -fx-font-style: italic; -fx-font-size: 14px;");
+            habitsContainer.getChildren().add(placeholder);
+        } else {
+            for (Habit habit : habits) {
+                habitsContainer.getChildren().add(createHabitCard(habit));
+            }
+        }
+    }
+
+    /**
+     * Dynamically builds a premium-styled card component for a habit.
+     */
+    private VBox createHabitCard(Habit habit) {
+        VBox card = new VBox(12.0);
+        card.getStyleClass().add("bg-card");
+
+        // Row 1: Habit Name and completion indicator
+        HBox row1 = new HBox();
+        row1.setAlignment(Pos.CENTER_LEFT);
+        
+        Label lblName = new Label(habit.getName());
+        lblName.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+        HBox.setHgrow(lblName, Priority.ALWAYS);
+
+        // Completion indicator for today
+        Label lblTodayStatus = new Label();
+        if (habit.isActiveOnDate(today)) {
+            boolean completedToday = habit.isCompletedOn(today);
+            lblTodayStatus.setText(completedToday ? "COMPLETADO HOY" : "PENDIENTE HOY");
+            lblTodayStatus.setStyle(completedToday 
+                    ? "-fx-font-size: 10px; -fx-font-weight: bold; -fx-background-color: #065f46; -fx-text-fill: #34d399; -fx-padding: 3px 8px; -fx-background-radius: 4px;"
+                    : "-fx-font-size: 10px; -fx-font-weight: bold; -fx-background-color: #7f1d1d; -fx-text-fill: #f87171; -fx-padding: 3px 8px; -fx-background-radius: 4px;");
+        } else {
+            lblTodayStatus.setText("NO PROGRAMADO HOY");
+            lblTodayStatus.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-background-color: #374151; -fx-text-fill: #9ca3af; -fx-padding: 3px 8px; -fx-background-radius: 4px;");
+        }
+
+        row1.getChildren().addAll(lblName, lblTodayStatus);
+
+        // Row 2: Metadata (Duration, Start date, Completions status)
+        int hours = habit.getDailyDurationMinutes() / 60;
+        int mins = habit.getDailyDurationMinutes() % 60;
+        String durationStr = (hours > 0 ? hours + "h " : "") + mins + "m/día";
+        
+        int comps = habit.getTotalCompletionsCount(today);
+        int scheds = habit.getTotalScheduledDaysCount(today);
+        double rate = habit.getCompletionRate(today);
+        
+        Label lblMeta = new Label(String.format("Duración: %s  |  Desde: %s  |  Progreso: %d/%d días (%.1f%%)",
+                durationStr, habit.getStartDate().toString(), comps, scheds, rate * 100));
+        lblMeta.setStyle("-fx-font-size: 12px; -fx-text-fill: #9ca3af;");
+
+        // Row 3: Progress Bar
+        ProgressBar progressBar = new ProgressBar(rate);
+        progressBar.setMaxWidth(Double.MAX_VALUE);
+
+        // Row 4: Horizontal Checklist for the past 5 active days (interactive calendar tracking)
+        VBox historySection = new VBox(6.0);
+        Label lblHistoryTitle = new Label("Historial de los últimos 5 días:");
+        lblHistoryTitle.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #a78bfa;");
+        
+        HBox historyGrid = new HBox(12.0);
+        historyGrid.setAlignment(Pos.CENTER_LEFT);
+        
+        boolean hasPastChecklist = false;
+        for (int i = 4; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
+            if (habit.isActiveOnDate(date)) {
+                hasPastChecklist = true;
+                
+                VBox dayCol = new VBox(4.0);
+                dayCol.setAlignment(Pos.CENTER);
+                dayCol.setMinWidth(48.0);
+                
+                String labelText = getDayLabel(date);
+                Label lblDay = new Label(labelText);
+                lblDay.setStyle("-fx-font-size: 10px; -fx-text-fill: #9ca3af;");
+                
+                CheckBox chk = new CheckBox();
+                chk.getStyleClass().add("check-item");
+                chk.setSelected(habit.isCompletedOn(date));
+                chk.setOnAction(e -> {
+                    habitService.toggleCompletion(habit.getId(), date);
+                    refreshDashboard();
+                });
+                
+                dayCol.getChildren().addAll(lblDay, chk);
+                historyGrid.getChildren().add(dayCol);
+            }
+        }
+        if (!hasPastChecklist) {
+            Label lblNoDays = new Label("No hay días programados en el período de 5 días.");
+            lblNoDays.setStyle("-fx-font-size: 11px; -fx-text-fill: #4b5563; -fx-font-style: italic;");
+            historyGrid.getChildren().add(lblNoDays);
+        }
+        historySection.getChildren().addAll(lblHistoryTitle, historyGrid);
+
+        // Row 5: Action buttons (Edit & Delete)
+        HBox row5 = new HBox(10.0);
+        row5.setAlignment(Pos.CENTER_RIGHT);
+        
+        Button btnEdit = new Button("Editar");
+        btnEdit.getStyleClass().add("btn-secondary");
+        btnEdit.setStyle("-fx-padding: 5px 12px; -fx-font-size: 12px;");
+        btnEdit.setOnAction(e -> loadHabitIntoForm(habit));
+        
+        Button btnDelete = new Button("Eliminar");
+        btnDelete.getStyleClass().add("btn-danger");
+        btnDelete.setOnAction(e -> handleDeleteHabit(habit));
+
+        row5.getChildren().addAll(btnEdit, btnDelete);
+
+        card.getChildren().addAll(row1, lblMeta, progressBar, historySection, row5);
+        return card;
+    }
+
+    private String getDayLabel(LocalDate date) {
+        if (date.isEqual(today)) {
+            return "Hoy";
+        } else if (date.isEqual(today.minusDays(1))) {
+            return "Ayer";
+        } else {
+            String name = date.getDayOfWeek().getDisplayName(TextStyle.SHORT, new Locale("es", "ES"));
+            return name.substring(0, 1).toUpperCase() + name.substring(1);
+        }
+    }
+
+    // --- Action Handlers ---
+
+    private void loadHabitIntoForm(Habit habit) {
+        editingHabitId = habit.getId();
+        lblFormTitle.setText("Editar Hábito");
+        btnSave.setText("Actualizar Hábito");
+
+        nameField.setText(habit.getName());
+        hoursSpinner.getValueFactory().setValue(habit.getDailyDurationMinutes() / 60);
+        minutesSpinner.getValueFactory().setValue(habit.getDailyDurationMinutes() % 60);
+        startDatePicker.setValue(habit.getStartDate());
+        
+        // This will trigger the startDatePicker listener, enabling pastCompletionSpinner and setting max limits.
+        // We defer setting the spinner value slightly to let the listener construct the value factory first!
+        Platform.runLater(() -> {
+            if (habit.getStartDate().isBefore(today)) {
+                pastCompletionSpinner.getValueFactory().setValue(habit.getCompletedDaysInPast());
+            }
+        });
+
+        setSelectedDaysOfWeek(habit.getDaysOfWeek());
+        
+        clearFeedback();
+        validateFormInputsRealTime();
+    }
+
+    @FXML
+    private void handleSaveHabit() {
+        String name = nameField.getText();
+        int hours = hoursSpinner.getValue() != null ? hoursSpinner.getValue() : 0;
+        int minutes = minutesSpinner.getValue() != null ? minutesSpinner.getValue() : 0;
+        int totalMinutes = hours * 60 + minutes;
+        LocalDate startDate = startDatePicker.getValue();
+        int completedPast = pastCompletionSpinner.getValue() != null ? pastCompletionSpinner.getValue() : 0;
+        Set<DayOfWeek> days = getSelectedDaysOfWeek();
+
+        Habit habit;
+        if (editingHabitId == null) {
+            habit = new Habit(name, startDate, totalMinutes, days, completedPast);
+        } else {
+            habit = habitService.getHabitById(editingHabitId);
+            if (habit == null) {
+                showFeedback("Error: El hábito a editar ya no existe.", true);
+                return;
+            }
+            habit.setName(name);
+            habit.setStartDate(startDate);
+            habit.setDailyDurationMinutes(totalMinutes);
+            habit.setDaysOfWeek(days);
+            habit.setCompletedDaysInPast(completedPast);
+        }
+
+        try {
+            if (editingHabitId == null) {
+                habitService.addHabit(habit);
+                showFeedback("¡Hábito '" + name + "' creado exitosamente!", false);
+            } else {
+                habitService.updateHabit(habit);
+                showFeedback("¡Hábito actualizado exitosamente!", false);
+            }
+            handleClearForm();
+            refreshDashboard();
+        } catch (ValidationException e) {
+            showFeedback("Error: " + e.getMessage(), true);
+        }
+    }
+
+    @FXML
+    private void handleClearForm() {
+        editingHabitId = null;
+        lblFormTitle.setText("Crear Nuevo Hábito");
+        btnSave.setText("Guardar Hábito");
+
+        nameField.clear();
+        hoursSpinner.getValueFactory().setValue(0);
+        minutesSpinner.getValueFactory().setValue(30);
+        startDatePicker.setValue(today);
+        pastCompletionSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 0, 0));
+        
+        btnMon.setSelected(false);
+        btnTue.setSelected(false);
+        btnWed.setSelected(false);
+        btnThu.setSelected(false);
+        btnFri.setSelected(false);
+        btnSat.setSelected(false);
+        btnSun.setSelected(false);
+
+        // De-selected feedback is kept unless specifically cleared, let's keep it clean
+        validateFormInputsRealTime();
+    }
+
+    private void handleDeleteHabit(Habit habit) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmar eliminación");
+        alert.setHeaderText("Eliminar hábito");
+        alert.setContentText("¿Está seguro de que desea eliminar el hábito '" + habit.getName() + "'?");
+        
+        // Custom styling for Alert Dialogs
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/views/styles.css").toExternalForm());
+        dialogPane.getStyleClass().add("bg-dark");
+        
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            habitService.deleteHabit(habit.getId());
+            showFeedback("Hábito eliminado.", false);
+            refreshDashboard();
+            if (editingHabitId != null && editingHabitId.equals(habit.getId())) {
+                handleClearForm();
+            }
+        }
+    }
+
+    // --- Feedback Helpers ---
+
+    private void showFeedback(String message, boolean isError) {
+        feedbackLabel.setText(message);
+        if (isError) {
+            feedbackLabel.getStyleClass().setAll("error-msg");
+        } else {
+            feedbackLabel.getStyleClass().setAll("success-msg");
+        }
+    }
+
+    private void clearFeedback() {
+        feedbackLabel.setText("");
+        feedbackLabel.getStyleClass().clear();
+    }
+}
