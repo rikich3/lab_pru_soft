@@ -22,27 +22,28 @@
     "createdAt": "2026-05-25T05:43:14.599868314"
   },
   {
-    "id": "fa285e6f-734e-495c-95fd-c2f3fc95a5d6",
+    "id": "a2bf21a4-c8e7-4e75-9f8b-25adb39f11b8",
     "name": "Programar",
     "startDate": "2026-05-22",
     "dailyDurationMinutes": 30,
     "daysOfWeek": [
-      "WEDNESDAY",
       "THURSDAY",
       "TUESDAY",
       "MONDAY",
       "FRIDAY",
       "SATURDAY",
-      "SUNDAY"
+      "SUNDAY",
+      "WEDNESDAY"
     ],
-    "completedDaysInPast": 5,
+    "completedDaysInPast": 0,
     "history": {
-      "2026-05-27": true,
+      "2026-05-27": false,
       "2026-05-26": true,
       "2026-05-25": true,
       "2026-05-24": true,
-      "2026-05-23": true
+      "2026-05-23": true,
+      "2026-05-22": true
     },
-    "createdAt": "2026-05-27T23:20:58.8299579"
+    "createdAt": "2026-05-27T23:32:06.1488143"
   }
 ]

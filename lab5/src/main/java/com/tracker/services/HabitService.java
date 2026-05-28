@@ -1,9 +1,11 @@
 package com.tracker.services;
 
-import com.google.gson.*;
-import com.tracker.models.Habit;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Type;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -12,6 +14,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import com.tracker.models.Habit;
 
 public class HabitService {
     private static final String FILE_NAME = "habits.json";
@@ -41,16 +54,17 @@ public class HabitService {
     }
 
     public void addHabit(Habit habit) throws ValidationException {
-        validateHabit(habit);
+        validateHabit(habit); // 1. Primero valida los datos del usuario
+        habit.initializeHistoryFromPastCompletions(); // 2. Migra los días pasados al historial
         habits.add(habit);
         saveHabits();
     }
 
     public void updateHabit(Habit updatedHabit) throws ValidationException {
-        // Validate FIRST before modifying any existing habit
-        validateHabit(updatedHabit);
+        validateHabit(updatedHabit); // 1. Valida primero
+        updatedHabit.initializeHistoryFromPastCompletions(); // 2. Migra si se modificaron datos del pasado
         
-        // Only proceed with the update if validation passed
+        // Solo procede con la actualización si la validación pasó
         for (int i = 0; i < habits.size(); i++) {
             if (habits.get(i).getId().equals(updatedHabit.getId())) {
                 habits.set(i, updatedHabit);

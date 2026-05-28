@@ -160,61 +160,12 @@ public class Habit {
      * Calculates the total completions: past completions + active completions in history.
      */
     public int getTotalCompletionsCount(LocalDate today) {
-        int count = completedDaysInPast;
+        int count = completedDaysInPast; // Será 0 para hábitos nuevos, pero mantiene compatibilidad con datos viejos
         for (Map.Entry<LocalDate, Boolean> entry : getHistory().entrySet()) {
             LocalDate date = entry.getKey();
-            // Count history entries that are today or in the past (but after/on startDate) 
-            // and were completed.
-            // Note: dates before today that are in the past window might have been explicitly tracked 
-            // after the habit was created. We should only count dates that are >= startDate and completed.
+            // Contamos cualquier día que esté registrado como completado (true) y sea posterior o igual a la fecha de inicio
             if (!date.isBefore(startDate) && entry.getValue()) {
-                // If it is before today, and we already accounted for past completions count, 
-                // wait - do we double count? 
-                // To avoid double-counting, any manual history entries before today should only be counted 
-                // if they are not in the initial "past interval" OR if the initial past interval was 
-                // checked off manually.
-                // Let's adopt a clean model:
-                // - completedDaysInPast represents completions during the interval [startDate, creationDate) 
-                //   where creationDate is when the habit was registered.
-                // - To make things simple and consistent, let's treat history as the source of truth for 
-                //   dates >= startDate, and completedDaysInPast as a static addition for the days before today 
-                //   that were NOT individually logged in history.
-                // Better yet: completedDaysInPast is a constant. We only count entries in history that are 
-                // NOT in the past interval, OR we simply say:
-                // If a date is >= today, and is in history as completed, we count it.
-                // If a date is < today, we count it ONLY if it is in history. But what about completedDaysInPast?
-                // Let's define: history only tracks completions from the day the habit was added to today and onwards.
-                // So, total completions = completedDaysInPast + count of completed days in history that are >= today.
-                // Wait! What if the user completes a day that was yesterday, which was after the creation date?
-                // Let's say: history contains all completions. For any date in the past that is NOT in history,
-                // we don't have individual records, but we do have completedDaysInPast.
-                // Let's make it simpler and cleaner:
-                // When we create a habit, we ask for completedDaysInPast.
-                // For any day from creation date onwards, the user checks it off in the history.
-                // If a user checks off a day in history, it is in history.
-                // Let's make history the sole container, and completedDaysInPast is just an initial booster.
-                // To be precise: completedDaysInPast is the completion count for the closed interval [startDate, today.minusDays(1)].
-                // Thus, the history only contains manual check-ins for dates >= today.
-                // Let's enforce this: we only allow checking off habits for dates >= startDate. 
-                // If the user completes a habit for a date >= today, it goes into history.
-                // If today changes, the system can migrate history. But for a simple app:
-                // Total completions = completedDaysInPast + count of history entries with value = true for dates >= today.
-                // Let's check this! If we do this, it is perfectly clean.
-                if (!date.isBefore(today)) {
-                    count++;
-                } else {
-                    // What if the user checks off a date in the past that is >= startDate?
-                    // If they do it in the calendar, it will be in history.
-                    // If we just count all true values in history plus completedDaysInPast,
-                    // we must ensure we don't double count.
-                    // Let's say: completedDaysInPast represents completions on scheduled days before today.
-                    // If a date is < today, it's already represented in completedDaysInPast at creation time,
-                    // unless the user edits it.
-                    // Let's do:
-                    // Total completions = completedDaysInPast + (history count of true for dates >= today).
-                    // This is extremely simple, elegant, and robust!
-                    count++;
-                }
+                count++;
             }
         }
         return count;
@@ -239,5 +190,32 @@ public class Habit {
         }
         int totalCompleted = getTotalCompletionsCount(today);
         return Math.min(1.0, (double) totalCompleted / totalScheduled);
+    }
+
+    /**
+     * Migra los días completados en el pasado directamente al mapa de historial
+     * para tener una única fuente de verdad y evitar doble conteo.
+     */
+    public void initializeHistoryFromPastCompletions() {
+        if (completedDaysInPast <= 0) {
+            return; // No hay nada que migrar
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDate current = startDate;
+        int completionCounter = 0;
+
+        // Recorremos los días programados desde la fecha de inicio hasta hoy
+        while (!current.isAfter(today) && completionCounter < completedDaysInPast) {
+            // Solo procesamos días que están programados y que no están ya en el historial
+            if (daysOfWeek.contains(current.getDayOfWeek()) && !getHistory().containsKey(current)) {
+                getHistory().put(current, true);
+                completionCounter++;
+            }
+            current = current.plusDays(1);
+        }
+
+        // Limpiamos completedDaysInPast ya que ahora está en el historial
+        completedDaysInPast = 0;
     }
 }
