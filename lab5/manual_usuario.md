@@ -18,6 +18,8 @@ La aplicación cuenta con rigurosas validaciones de lógica en tiempo real para 
    - [Eliminar un Hábito](#5-eliminar-un-hábito)
 5. [Reglas de Validación y Prevención de Errores](#-reglas-de-validación-y-prevención-de-errores)
 6. [Persistencia de Datos (Guardado Automático)](#-persistencia-de-datos-guardado-automático)
+7. [Comportamientos de Diseño Intencionales (No son Bugs)](#-comportamientos-de-diseño-intencionales-no-son-bugs)
+8. [Robustez y Tolerancia a Fallos del Entorno](#-robustez-y-tolerancia-a-fallos-del-entorno)
 
 ---
 
@@ -133,3 +135,37 @@ No necesitas preocuparte por perder tu progreso al cerrar la aplicación:
 - **Guardado Automático**: Cada acción que realizas (crear, editar, eliminar o marcar un hábito como completado) se escribe y guarda de forma automática e instantánea en el disco local en un archivo llamado **`habits.json`** en el directorio raíz de la aplicación.
 - **Carga Automática**: Al iniciar la aplicación, Habitflow busca y carga este archivo para restablecer tu panel exactamente en el estado en que lo dejaste.
 - **Fácil Reseteo**: Si por motivos de prueba deseas vaciar por completo la aplicación, simplemente elimina el archivo `habits.json` del directorio raíz antes de abrir el software.
+
+- ## 🛡️ Comportamientos de Diseño Intencionales (No son Bugs)
+
+Para evitar que la aplicación entre en estados lógicos inconsistentes o sufra corrupción de datos, se han implementado restricciones estrictas en la interfaz de usuario. Los siguientes comportamientos son **características de seguridad intencionales** y no deben ser reportados como fallos:
+
+### 1. Bloqueo de escritura en el Selector de Fechas (DatePicker)
+*   **Comportamiento:** No se puede escribir texto libremente con el teclado dentro de la caja de fecha.
+*   **Razón de diseño:** Evita la inyección de formatos de fecha inválidos, texto aleatorio (como "hola") o fechas inexistentes (como "99/99/9999") que corrompan el flujo de datos. El usuario está obligado a seleccionar la fecha de manera segura mediante el calendario gráfico desplegable.
+
+### 2. Spinners no editables por teclado
+*   **Comportamiento:** Las flechas de selección de horas, minutos y días pasados requieren clics y no permiten la edición directa por teclado.
+*   **Razón de diseño:** Protege al sistema de la entrada de caracteres alfabéticos, números negativos o desbordes numéricos fuera de los rangos lógicos permitidos por el dominio del negocio.
+
+### 3. Spinner de "Días cumplidos en el pasado" deshabilitado en modo Edición
+*   **Comportamiento:** Al editar un hábito existente, el campo numérico de días cumplidos en el pasado se muestra bloqueado (deshabilitado).
+*   **Razón de diseño:** Una vez creado el hábito, el historial del pasado se migra de forma definitiva al mapa de historial (`history`) y se representa visualmente mediante checkboxes en el panel izquierdo. Para modificar el progreso de días anteriores, el usuario debe marcar o desmarcar directamente dichos checkboxes en el historial. Permitir modificar el spinner en edición duplicaría el conteo de días de manera inconsistente.
+
+### 4. Normalización estricta de nombres duplicados
+*   **Comportamiento:** Si intentas registrar "Hacer Ejercicio" existiendo ya un hábito llamado "Hacer   Ejercicio" (con múltiples espacios en medio), el sistema rechazará el registro.
+*   **Razón de diseño:** El validador normaliza internamente los nombres eliminando espacios redundantes. Esto previene que existan tarjetas visualmente idénticas en el tablero que confundan al usuario final.
+
+---
+
+## ☣️ Robustez y Tolerancia a Fallos del Entorno
+
+La aplicación cuenta con mecanismos de defensa pasiva para responder ante escenarios adversos del sistema operativo o manipulación externa:
+
+### 1. Tolerancia a la corrupción del archivo de persistencia
+*   **Comportamiento:** Si un tercero edita manualmente el archivo `habits.json` introduciendo caracteres inválidos que rompan la estructura JSON, la aplicación no colapsará (crash) en el arranque.
+*   **Razón de diseño:** El cargador de persistencia captura excepciones de sintaxis (`JsonSyntaxException`), inicia un tablero vacío de forma segura para garantizar la disponibilidad del software y registra el aviso en la consola de diagnóstico.
+
+### 2. Control de fallas de escritura en disco (Rollback transaccional)
+*   **Comportamiento:** Si el archivo `habits.json` se encuentra bloqueado por el sistema operativo, marcado como "Solo lectura" o la aplicación se ejecuta en un directorio sin permisos de escritura, las operaciones de creación o edición mostrarán un mensaje de error en rojo y no se aplicarán.
+*   **Razón de diseño:** Si la escritura física en disco falla, la aplicación realiza un "rollback" (marcha atrás) de la operación en memoria. Esto asegura que la interfaz visual no le mienta al usuario mostrando un hábito creado que se perderá inmediatamente al cerrar el software.
