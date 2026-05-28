@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -108,23 +109,30 @@ public class MainController {
     // --- State Variables ---
     private HabitService habitService;
     private UUID editingHabitId = null;
-    private final LocalDate today = LocalDate.now();
+    private LocalDate today = LocalDate.now();
     private boolean isResetting = false;
 
     @FXML
     public void initialize() {
         this.habitService = new HabitService();
 
-        // 1. Configure spin controls
-        hoursSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24, 0));
+        // Configurar spinners: Horas limitado a 23 para evitar desbordes de 24h
+        hoursSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, 0));
         minutesSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 30));
         pastCompletionSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 0, 0));
 
-        // 2. Set default values
+        // Bloquear edición manual por teclado en los spinners para evitar entradas inválidas (Evita Bug Crítico 2)
+        hoursSpinner.setEditable(false);
+        minutesSpinner.setEditable(false);
+        pastCompletionSpinner.setEditable(false);
+
+        // Set default values
+        this.today = LocalDate.now();
         startDatePicker.setValue(today);
+        startDatePicker.setEditable(false);
         updatePastCompletionsSpinnerState(today);
 
-        // 3. Attach listeners for real-time input validations
+        // Resto de los listeners...
         nameField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!isResetting) {
                 clearFeedback();
@@ -139,7 +147,6 @@ public class MainController {
             validateFormInputsRealTime();
         });
 
-        // Set up toggle buttons change listeners
         List<ToggleButton> dayButtons = Arrays.asList(btnMon, btnTue, btnWed, btnThu, btnFri, btnSat, btnSun);
         for (ToggleButton btn : dayButtons) {
             btn.selectedProperty().addListener((obs, oldVal, newVal) -> {
@@ -148,7 +155,6 @@ public class MainController {
             });
         }
 
-        // 4. Load initial dashboard
         refreshDashboard();
         validateFormInputsRealTime();
     }
@@ -204,6 +210,9 @@ public class MainController {
      * Checks all form inputs in real-time to enable/disable the "Save" button.
      */
     private void validateFormInputsRealTime() {
+        // Sincronizar fecha para validaciones precisas
+        this.today = LocalDate.now();
+
         String name = nameField.getText();
         int hours = hoursSpinner.getValue() != null ? hoursSpinner.getValue() : 0;
         int minutes = minutesSpinner.getValue() != null ? minutesSpinner.getValue() : 0;
@@ -215,6 +224,13 @@ public class MainController {
                 && totalMinutes > 0 && totalMinutes <= 1440
                 && startDate != null && !startDate.isAfter(today)
                 && !days.isEmpty();
+
+        // Da retroalimentación al usuario si la fecha es en el futuro
+        if (startDate != null && startDate.isAfter(today)) {
+            showFeedback("Error: La fecha de inicio no puede ser en el futuro.", true);
+        } else if (feedbackLabel.getText().equals("Error: La fecha de inicio no puede ser en el futuro.")) {
+            clearFeedback();
+        }
 
         btnSave.setDisable(!isValid);
     }
@@ -246,6 +262,7 @@ public class MainController {
      * Calculates statistics and rebuilds the habit list cards.
      */
     private void refreshDashboard() {
+        this.today = LocalDate.now(); // ← Asegura la sincronización con el reloj del sistema (Evita desfase de medianoche)
         List<Habit> habits = habitService.getAllHabits();
 
         // 1. Update overall statistics
@@ -418,9 +435,18 @@ public class MainController {
         minutesSpinner.getValueFactory().setValue(habit.getDailyDurationMinutes() % 60);
         startDatePicker.setValue(habit.getStartDate());
         
+        pastCompletionContainer.setDisable(true);
+        
         Platform.runLater(() -> {
             if (habit.getStartDate().isBefore(today)) {
-                pastCompletionSpinner.getValueFactory().setValue(habit.getCompletedDaysInPast());
+                int completedPastCount = 0;
+                for (Map.Entry<LocalDate, Boolean> entry : habit.getHistory().entrySet()) {
+                    LocalDate date = entry.getKey();
+                    if (date.isBefore(today) && habit.isActiveOnDate(date) && entry.getValue()) {
+                        completedPastCount++;
+                    }
+                }
+                pastCompletionSpinner.getValueFactory().setValue(completedPastCount);
             }
         });
 
@@ -451,8 +477,7 @@ public class MainController {
                 return;
             }
             
-            // Create a temporary clone to validate BEFORE modifying the original
-            habit = new Habit(name, startDate, totalMinutes, days, completedPast);
+            habit = new Habit(name, startDate, totalMinutes, days, 0); 
             habit.setId(editingHabitId);
             habit.setCreatedAt(original.getCreatedAt());
             habit.setHistory(new HashMap<>(original.getHistory()));

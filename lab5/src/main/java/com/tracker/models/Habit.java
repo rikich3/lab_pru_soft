@@ -197,25 +197,31 @@ public class Habit {
      * para tener una única fuente de verdad y evitar doble conteo.
      */
     public void initializeHistoryFromPastCompletions() {
+        LocalDate today = LocalDate.now();
+
+        // 1. Limpiamos cualquier registro previo en el historial de días pasados programados.
+        // Esto asegura que si el usuario edita el número (ej. de 2 a 1, o a 0), el historial se adapte correctamente.
+        getHistory().keySet().removeIf(date -> date.isBefore(today) && isActiveOnDate(date));
+
+        // 2. Si no hay días que migrar, terminamos aquí
         if (completedDaysInPast <= 0) {
-            return; // No hay nada que migrar
+            return;
         }
 
-        LocalDate today = LocalDate.now();
         LocalDate current = startDate;
         int completionCounter = 0;
 
-        // Recorremos los días programados desde la fecha de inicio hasta hoy
-        while (!current.isAfter(today) && completionCounter < completedDaysInPast) {
-            // Solo procesamos días que están programados y que no están ya en el historial
-            if (daysOfWeek.contains(current.getDayOfWeek()) && !getHistory().containsKey(current)) {
+        // 3. Recorremos los días programados desde la fecha de inicio hasta hoy (exclusivo)
+        while (current.isBefore(today) && completionCounter < completedDaysInPast) {
+            // Solo procesamos días que están programados
+            if (daysOfWeek.contains(current.getDayOfWeek())) {
                 getHistory().put(current, true);
                 completionCounter++;
             }
             current = current.plusDays(1);
         }
 
-        // Limpiamos completedDaysInPast ya que ahora está en el historial
+        // 4. Limpiamos completedDaysInPast ya que ahora está en el historial
         completedDaysInPast = 0;
     }
 }

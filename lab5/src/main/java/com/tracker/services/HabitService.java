@@ -24,6 +24,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.JsonSyntaxException; 
 import com.tracker.models.Habit;
 
 public class HabitService {
@@ -54,21 +55,31 @@ public class HabitService {
     }
 
     public void addHabit(Habit habit) throws ValidationException {
-        validateHabit(habit); // 1. Primero valida los datos del usuario
-        habit.initializeHistoryFromPastCompletions(); // 2. Migra los días pasados al historial
+        validateHabit(habit); 
+        habit.initializeHistoryFromPastCompletions(); 
         habits.add(habit);
-        saveHabits();
+        
+        if (!saveHabits()) {
+            habits.remove(habit);
+            throw new ValidationException("Error crítico: No se pudo escribir en disco (permisos denegados).");
+        }
     }
 
     public void updateHabit(Habit updatedHabit) throws ValidationException {
-        validateHabit(updatedHabit); // 1. Valida primero
-        updatedHabit.initializeHistoryFromPastCompletions(); // 2. Migra si se modificaron datos del pasado
+        validateHabit(updatedHabit); 
         
-        // Solo procede con la actualización si la validación pasó
+        LocalDate newStartDate = updatedHabit.getStartDate();
+        updatedHabit.getHistory().keySet().removeIf(date -> date.isBefore(newStartDate));
+        
         for (int i = 0; i < habits.size(); i++) {
             if (habits.get(i).getId().equals(updatedHabit.getId())) {
+                Habit oldHabit = habits.get(i);
                 habits.set(i, updatedHabit);
-                saveHabits();
+                
+                if (!saveHabits()) {
+                    habits.set(i, oldHabit);
+                    throw new ValidationException("Error crítico: No se pudieron guardar los cambios en disco.");
+                }
                 return;
             }
         }
@@ -102,11 +113,13 @@ public class HabitService {
             throw new ValidationException("El nombre del hábito no puede estar vacío.");
         }
 
-        // 2. Duplicate Name validation (case-insensitive, trimmed)
+        // 2. Duplicate Name validation (normalizando espacios internos y externos)
+        String normalizedNewName = habit.getName().trim().replaceAll("\\s+", " ");
         for (Habit existing : habits) {
             if (!existing.getId().equals(habit.getId())) {
-                if (existing.getName().trim().equalsIgnoreCase(habit.getName().trim())) {
-                    throw new ValidationException("Ya existe un hábito con el nombre '" + habit.getName().trim() + "'.");
+                String normalizedExisting = existing.getName().trim().replaceAll("\\s+", " ");
+                if (normalizedExisting.equalsIgnoreCase(normalizedNewName)) {
+                    throw new ValidationException("Ya existe un hábito con el nombre '" + normalizedNewName + "'.");
                 }
             }
         }
@@ -183,11 +196,13 @@ public class HabitService {
 
     // --- JSON Persistence ---
 
-    private synchronized void saveHabits() {
+    private synchronized boolean saveHabits() {
         try (Writer writer = new FileWriter(FILE_NAME)) {
             gson.toJson(habits, writer);
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -200,8 +215,8 @@ public class HabitService {
             Type listType = new com.google.gson.reflect.TypeToken<ArrayList<Habit>>() {}.getType();
             List<Habit> loaded = gson.fromJson(reader, listType);
             return loaded != null ? loaded : new ArrayList<>();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException | JsonSyntaxException e) {
+            System.err.println("Archivo JSON corrupto o ilegible. Iniciando tablero vacío.");
             return new ArrayList<>();
         }
     }
