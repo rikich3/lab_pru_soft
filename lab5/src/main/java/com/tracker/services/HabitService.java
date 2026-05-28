@@ -47,7 +47,10 @@ public class HabitService {
     }
 
     public void updateHabit(Habit updatedHabit) throws ValidationException {
+        // Validate FIRST before modifying any existing habit
         validateHabit(updatedHabit);
+        
+        // Only proceed with the update if validation passed
         for (int i = 0; i < habits.size(); i++) {
             if (habits.get(i).getId().equals(updatedHabit.getId())) {
                 habits.set(i, updatedHabit);

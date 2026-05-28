@@ -2,11 +2,14 @@ package com.tracker.controllers;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.TextStyle;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -434,18 +437,21 @@ public class MainController {
 
         Habit habit;
         if (editingHabitId == null) {
+            // Creating a new habit
             habit = new Habit(name, startDate, totalMinutes, days, completedPast);
         } else {
-            habit = habitService.getHabitById(editingHabitId);
-            if (habit == null) {
+            // Editing an existing habit: create a temporary clone with updated values
+            Habit original = habitService.getHabitById(editingHabitId);
+            if (original == null) {
                 showFeedback("Error: El hábito a editar ya no existe.", true);
                 return;
             }
-            habit.setName(name);
-            habit.setStartDate(startDate);
-            habit.setDailyDurationMinutes(totalMinutes);
-            habit.setDaysOfWeek(days);
-            habit.setCompletedDaysInPast(completedPast);
+            
+            // Create a temporary clone to validate BEFORE modifying the original
+            habit = new Habit(name, startDate, totalMinutes, days, completedPast);
+            habit.setId(editingHabitId);
+            habit.setCreatedAt(original.getCreatedAt());
+            habit.setHistory(new HashMap<>(original.getHistory()));
         }
 
         try {
@@ -453,6 +459,7 @@ public class MainController {
                 habitService.addHabit(habit);
                 showFeedback("¡Hábito '" + name + "' creado exitosamente!", false);
             } else {
+                // Validation happens inside updateHabit before any changes
                 habitService.updateHabit(habit);
                 showFeedback("¡Hábito actualizado exitosamente!", false);
             }

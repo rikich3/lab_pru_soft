@@ -22,33 +22,27 @@
     "createdAt": "2026-05-25T05:43:14.599868314"
   },
   {
-    "id": "27d4443b-35f5-45af-a0f1-21f6b5f23f39",
-    "name": "Leer",
-    "startDate": "2026-05-27",
-    "dailyDurationMinutes": 90,
+    "id": "fa285e6f-734e-495c-95fd-c2f3fc95a5d6",
+    "name": "Programar",
+    "startDate": "2026-05-22",
+    "dailyDurationMinutes": 30,
     "daysOfWeek": [
       "WEDNESDAY",
+      "THURSDAY",
+      "TUESDAY",
       "MONDAY",
-      "TUESDAY"
+      "FRIDAY",
+      "SATURDAY",
+      "SUNDAY"
     ],
-    "completedDaysInPast": 0,
-    "history": {},
-    "createdAt": "2026-05-27T23:04:05.702668"
-  },
-  {
-    "id": "fdbca961-710e-467c-88cb-7850ff9ae98f",
-    "name": "Leer",
-    "startDate": "2026-05-27",
-    "dailyDurationMinutes": 630,
-    "daysOfWeek": [
-      "WEDNESDAY",
-      "MONDAY",
-      "TUESDAY"
-    ],
-    "completedDaysInPast": 0,
+    "completedDaysInPast": 5,
     "history": {
-      "2026-05-27": true
+      "2026-05-27": true,
+      "2026-05-26": true,
+      "2026-05-25": true,
+      "2026-05-24": true,
+      "2026-05-23": true
     },
-    "createdAt": "2026-05-27T23:04:18.9447784"
+    "createdAt": "2026-05-27T23:20:58.8299579"
   }
 ]
