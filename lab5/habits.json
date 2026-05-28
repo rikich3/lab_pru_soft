@@ -1,49 +1,14 @@
 [
   {
-    "id": "7faa7065-4644-445f-9083-b3a5ed0c1b0c",
-    "name": "dormir 8 horas ",
-    "startDate": "2026-05-25",
-    "dailyDurationMinutes": 450,
-    "daysOfWeek": [
-      "WEDNESDAY",
-      "THURSDAY",
-      "SATURDAY",
-      "MONDAY",
-      "SUNDAY",
-      "TUESDAY",
-      "FRIDAY"
-    ],
-    "completedDaysInPast": 0,
-    "history": {
-      "2026-05-27": false,
-      "2026-05-25": false,
-      "2026-05-26": false
-    },
-    "createdAt": "2026-05-25T05:43:14.599868314"
-  },
-  {
-    "id": "a2bf21a4-c8e7-4e75-9f8b-25adb39f11b8",
-    "name": "Programar",
-    "startDate": "2026-05-22",
+    "id": "bee1fba2-f127-49cc-8fe1-b7c37e0a6a41",
+    "name": "Aprender QA",
+    "startDate": "2026-05-27",
     "dailyDurationMinutes": 30,
     "daysOfWeek": [
-      "THURSDAY",
-      "TUESDAY",
-      "MONDAY",
-      "FRIDAY",
-      "SATURDAY",
-      "SUNDAY",
-      "WEDNESDAY"
+      "MONDAY"
     ],
     "completedDaysInPast": 0,
-    "history": {
-      "2026-05-27": false,
-      "2026-05-26": true,
-      "2026-05-25": true,
-      "2026-05-24": true,
-      "2026-05-23": true,
-      "2026-05-22": true
-    },
-    "createdAt": "2026-05-27T23:32:06.1488143"
+    "history": {},
+    "createdAt": "2026-05-27T23:53:21.6452243"
   }
 ]

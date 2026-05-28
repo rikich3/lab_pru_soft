@@ -109,6 +109,7 @@ public class MainController {
     private HabitService habitService;
     private UUID editingHabitId = null;
     private final LocalDate today = LocalDate.now();
+    private boolean isResetting = false;
 
     @FXML
     public void initialize() {
@@ -124,7 +125,12 @@ public class MainController {
         updatePastCompletionsSpinnerState(today);
 
         // 3. Attach listeners for real-time input validations
-        nameField.textProperty().addListener((obs, oldVal, newVal) -> validateFormInputsRealTime());
+        nameField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!isResetting) {
+                clearFeedback();
+            }
+            validateFormInputsRealTime();
+        });
         hoursSpinner.valueProperty().addListener((obs, oldVal, newVal) -> validateFormInputsRealTime());
         minutesSpinner.valueProperty().addListener((obs, oldVal, newVal) -> validateFormInputsRealTime());
         
@@ -461,7 +467,7 @@ public class MainController {
                 habitService.updateHabit(habit);
                 showFeedback("¡Hábito actualizado exitosamente!", false);
             }
-            handleClearForm();
+            resetFormFields();
             refreshDashboard();
         } catch (ValidationException e) {
             showFeedback("Error: " + e.getMessage(), true);
@@ -470,6 +476,13 @@ public class MainController {
 
     @FXML
     private void handleClearForm() {
+        clearFeedback();
+        resetFormFields();
+    }
+
+    private void resetFormFields() {
+        isResetting = true;
+        
         editingHabitId = null;
         lblFormTitle.setText("Crear Nuevo Hábito");
         btnSave.setText("Guardar Hábito");
@@ -489,8 +502,9 @@ public class MainController {
         btnSat.setSelected(false);
         btnSun.setSelected(false);
 
-        // De-selected feedback is kept unless specifically cleared, let's keep it clean
         validateFormInputsRealTime();
+        
+        isResetting = false;
     }
 
     private void handleDeleteHabit(Habit habit) {
@@ -513,7 +527,7 @@ public class MainController {
             showFeedback("Hábito eliminado.", false);
             refreshDashboard();
             if (editingHabitId != null && editingHabitId.equals(habit.getId())) {
-                handleClearForm();
+                resetFormFields();
             }
         }
     }
