@@ -5,16 +5,50 @@
     "startDate": "2026-05-25",
     "dailyDurationMinutes": 450,
     "daysOfWeek": [
-      "MONDAY",
-      "FRIDAY",
       "WEDNESDAY",
       "THURSDAY",
       "SATURDAY",
+      "MONDAY",
       "SUNDAY",
+      "TUESDAY",
+      "FRIDAY"
+    ],
+    "completedDaysInPast": 0,
+    "history": {
+      "2026-05-27": false,
+      "2026-05-25": false,
+      "2026-05-26": false
+    },
+    "createdAt": "2026-05-25T05:43:14.599868314"
+  },
+  {
+    "id": "27d4443b-35f5-45af-a0f1-21f6b5f23f39",
+    "name": "Leer",
+    "startDate": "2026-05-27",
+    "dailyDurationMinutes": 90,
+    "daysOfWeek": [
+      "WEDNESDAY",
+      "MONDAY",
       "TUESDAY"
     ],
     "completedDaysInPast": 0,
     "history": {},
-    "createdAt": "2026-05-25T05:43:14.599868314"
+    "createdAt": "2026-05-27T23:04:05.702668"
+  },
+  {
+    "id": "fdbca961-710e-467c-88cb-7850ff9ae98f",
+    "name": "Leer",
+    "startDate": "2026-05-27",
+    "dailyDurationMinutes": 630,
+    "daysOfWeek": [
+      "WEDNESDAY",
+      "MONDAY",
+      "TUESDAY"
+    ],
+    "completedDaysInPast": 0,
+    "history": {
+      "2026-05-27": true
+    },
+    "createdAt": "2026-05-27T23:04:18.9447784"
   }
 ]
